@@ -1,0 +1,138 @@
+<!-- Add Transaction Modal -->
+<div id="transaction-modal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Add Transaction</h3>
+            <button class="modal-close" onclick="closeModal('transaction-modal')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        
+        <div class="modal-tabs">
+            <button class="modal-tab-btn active" onclick="switchModalTab('manual')">Manual Entry</button>
+            <button class="modal-tab-btn" onclick="switchModalTab('upload')">Upload Receipt</button>
+        </div>
+
+        <div id="manual-form-container">
+            <form action="/transactions/add" method="POST" class="auth-form">
+                <div class="form-group">
+                    <label>Merchant / Description</label>
+                    <input type="text" name="merchant" placeholder="e.g. Starbucks" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" name="amount" placeholder="0.00" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Category (Optional)</label>
+                    <select name="category" class="search-bar-input" style="padding: 0.75rem 1rem; background-color: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-color); font-family: inherit;">
+                        <option value="">Auto-categorize</option>
+                        <% Categories.forEach(cat => { %>
+                            <option value="<%= cat %>"><%= cat %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="text" name="note" placeholder="Optional note">
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Save Transaction</button>
+            </form>
+        </div>
+
+        <div id="upload-form-container" class="hidden">
+            <form action="/transactions/upload" method="POST" enctype="multipart/form-data" class="auth-form">
+                <div class="upload-area" onclick="document.getElementById('receipt-upload').click()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <p>Click to upload Photo or PDF</p>
+                    <span id="file-name-display" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">No file selected</span>
+                    <input type="file" id="receipt-upload" name="receipt" accept="image/*,.pdf" style="display: none;" onchange="handleFileSelect(this)">
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 1rem 0; text-align: center;">AI will extract merchant name, amount, and date automatically.</p>
+                <button type="submit" class="btn btn-primary w-full">Process Receipt</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.modal-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    position: relative;
+}
+
+.modal-tab-btn.active {
+    color: var(--primary-color);
+}
+
+.modal-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+.upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.upload-area:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.hidden { display: none; }
+</style>
+
+<script>
+function switchModalTab(tab) {
+    const manualBtn = document.querySelector('.modal-tab-btn:first-child');
+    const uploadBtn = document.querySelector('.modal-tab-btn:last-child');
+    const manualForm = document.getElementById('manual-form-container');
+    const uploadForm = document.getElementById('upload-form-container');
+
+    if (tab === 'manual') {
+        manualBtn.classList.add('active');
+        uploadBtn.classList.remove('active');
+        manualForm.classList.remove('hidden');
+        uploadForm.classList.add('hidden');
+    } else {
+        uploadBtn.classList.add('active');
+        manualBtn.classList.remove('active');
+        uploadForm.classList.remove('hidden');
+        manualForm.classList.add('hidden');
+    }
+}
+
+function handleFileSelect(input) {
+    const display = document.getElementById('file-name-display');
+    if (input.files.length > 0) {
+        display.textContent = input.files[0].name;
+        display.style.color = 'var(--primary-color)';
+    }
+}
+</script>

@@ -1,0 +1,84 @@
+<div class="page-title-section">
+    <div class="welcome-section">
+        <h2>AI Wealth Advisor</h2>
+        <p>Advanced insights and predictive analysis for your financial future.</p>
+    </div>
+</div>
+
+<div class="advisor-container">
+    <div class="advisor-hero card animated-gradient">
+        <div class="advisor-icon-large pulse">
+             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12.001l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 11.999l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        </div>
+        <div class="hero-content">
+            <h3>Intelligence Report Ready</h3>
+            <p>I've analyzed your patterns across <%= new Date().toLocaleString('default', { month: 'long' }) %> and previous months.</p>
+        </div>
+    </div>
+
+    <div class="suggestions-large-grid">
+        <% suggestions.forEach(s => { %>
+            <% 
+                let icon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"/><path d="m9 12 2 2 4-4"/></svg>';
+                if (s.type === 'danger' || s.type === 'alert') icon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+                if (s.type === 'forecast') icon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6"/><path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path d="M12 12H3"/><path d="M16 6H3"/><path d="M12 18H3"/></svg>';
+            %>
+            <div class="suggestion-card card status-<%= s.type || 'info' %>">
+                <div class="suggestion-header">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="suggestion-category"><%= s.category %></span>
+                        <% if (s.trend) { %>
+                            <span class="trend-tag <%= s.trend.startsWith('+') ? 'up' : 'down' %>"><%= s.trend %></span>
+                        <% } %>
+                    </div>
+                    <div class="suggestion-status-icon type-<%= s.type %>">
+                        <%- icon %>
+                    </div>
+                </div>
+                <p class="suggestion-body"><%= s.suggestion %></p>
+                <div class="suggestion-footer">
+                    <button class="btn btn-outline btn-sm">Optimize</button>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</div>
+
+<style>
+.animated-gradient {
+    background: linear-gradient(-45deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1), rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.2));
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.suggestion-card.status-danger { border-left: 4px solid var(--danger-color); }
+.suggestion-card.status-warning { border-left: 4px solid var(--accent-color); }
+.suggestion-card.status-success { border-left: 4px solid var(--success-color); }
+
+.trend-tag {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 700;
+}
+.trend-tag.up { background-color: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+.trend-tag.down { background-color: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+
+.type-danger { color: var(--danger-color); }
+.type-warning { color: var(--accent-color); }
+.type-success { color: var(--success-color); }
+.type-forecast { color: #a855f7; }
+</style>
