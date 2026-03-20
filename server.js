@@ -4,7 +4,6 @@ const path = require('path');
 const dotenv = require('dotenv');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-
 const { Categories } = require('./models/Transaction');
 
 dotenv.config();
@@ -14,9 +13,15 @@ app.locals.Categories = Categories;
 const PORT = process.env.PORT || 3000;
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost:27017/paysense')
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('MongoDB connection error:', err));
+
+mongoose.connect(
+    process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017/paysense'
+)
+.then(() => console.log(`Connected to MongoDB (${process.env.NODE_ENV || "dev"})`))
+.catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+});
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -37,10 +42,18 @@ app.use(session({
 
 // Routes
 const authRoutes = require('./routes/auth');
-const indexRoutes = require('./routes/index');
+const dashboardRoutes = require('./routes/dashboard');
+const transactionsRoutes = require('./routes/transactions');
+const budgetsRoutes = require('./routes/budgets');
+const advisorRoutes = require('./routes/advisor');
+const settingsRoutes = require('./routes/settings');
 
 app.use('/auth', authRoutes);
-app.use('/', indexRoutes);
+app.use('/transactions', transactionsRoutes);
+app.use('/budgets', budgetsRoutes);
+app.use('/advisor', advisorRoutes);
+app.use('/settings', settingsRoutes);
+app.use('/', dashboardRoutes);
 
 // Error Handling
 app.use((err, req, res, next) => {

@@ -57,7 +57,7 @@
         <form action="/budgets/add" method="POST" class="auth-form">
             <div class="form-group">
                 <label>Category</label>
-                <select name="category" class="search-bar-input" style="padding: 0.75rem 1rem; background-color: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-color); font-family: inherit;" required>
+                <select name="category" class="search-bar-input" style="padding: 0.75rem 1rem; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-color); font-family: inherit;" required>
                     <% Categories.forEach(cat => { %>
                         <option value="<%= cat %>"><%= cat %></option>
                     <% }); %>

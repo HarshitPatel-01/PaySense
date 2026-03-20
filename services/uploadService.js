@@ -44,15 +44,33 @@ function parseReceiptText(text) {
         }
     }
 
-    // Amount: Find largest number with decimals
-    const prices = text.match(/\d+\.\d{2}/g);
-    if (prices) {
-        const numericPrices = prices.map(p => parseFloat(p));
-        amount = Math.max(...numericPrices);
-    } else {
-        // Fallback for whole numbers
-        const wholeMatch = text.match(/(?:total|amount|₹|rs)\.?\s*[:\s]*(\d+)/i);
-        if (wholeMatch) amount = parseFloat(wholeMatch[1]);
+    // Amount: First look for multiple negative values (e.g. from a monthly statement)
+    const negativeMatches = text.match(/(?:-\s*?|−\s*?)(\d+(?:,\d{3})*(?:\.\d{2})?)/g);
+    if (negativeMatches && negativeMatches.length > 0) {
+        amount = negativeMatches.reduce((sum, match) => {
+            const numStr = match.replace(/[-\s,−]/g, '');
+            return sum + parseFloat(numStr);
+        }, 0);
+    } 
+    
+    // Amount: Fallback to look for "Total" or "Amount" or "₹" explicitly first
+    if (!amount) {
+        const explicitMatch = text.match(/(?:total|amount|grand total|net amount|₹|rs)\.?\s*[:\s]*((?:\d+,)*\d+(?:\.\d+)?)/i);
+        if (explicitMatch) {
+            amount = parseFloat(explicitMatch[1].replace(/,/g, ''));
+        } 
+    }
+    
+    // If not found, look for largest monetary value format
+    if (!amount) {
+        // Look for numbers that might be prices (with or without comma formatting)
+        const allNumbers = text.match(/\b\d+(?:,\d{3})*(?:\.\d{2})?\b/g);
+        if (allNumbers) {
+            const numericValues = allNumbers.map(n => parseFloat(n.replace(/,/g, ''))).filter(n => n < 100000); // Sanity check to ignore phone numbers/zip codes
+            if (numericValues.length > 0) {
+                amount = Math.max(...numericValues);
+            }
+        }
     }
 
     return { merchant, amount };

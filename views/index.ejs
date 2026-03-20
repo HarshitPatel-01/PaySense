@@ -17,7 +17,12 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
         </div>
         <div class="stat-info">
-            <span class="stat-label">Total Balance</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="stat-label">Total Balance</span>
+                <button class="btn-icon" onclick="openModal('balance-modal')" style="padding: 0.2rem;" title="Edit Balance">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </button>
+            </div>
             <h3 class="stat-value">₹<%= stats.totalBalance.toLocaleString() %></h3>
             <span class="stat-change positive">+2.5% from last month</span>
         </div>
@@ -48,12 +53,14 @@
     <div class="card chart-container">
         <div class="chart-header">
             <h3>Spending Overview</h3>
-            <select class="chart-filter">
+            <select class="chart-filter" style="background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 0.5rem; border-radius: 8px;">
                 <option>Last 7 Days</option>
                 <option>Last 30 Days</option>
             </select>
         </div>
-        <canvas id="spendingChart"></canvas>
+        <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="spendingChart"></canvas>
+        </div>
     </div>
 
     <div class="card recent-transactions">
@@ -61,30 +68,44 @@
             <h3>Recent Transactions</h3>
             <a href="/transactions" class="view-all">View All</a>
         </div>
-        <div class="transaction-list">
-            <% if (transactions.length > 0) { %>
-                <% transactions.forEach(tx => { %>
-                    <div class="transaction-item">
-                        <div class="tx-icon">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-                        </div>
-                        <div class="tx-details">
-                            <span class="tx-merchant"><%= tx.merchant %></span>
-                            <span class="tx-category"><%= tx.category %></span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div class="tx-amount negative">-₹<%= tx.amount.toLocaleString() %></div>
-                            <form action="/transactions/delete/<%= tx._id %>" method="POST" onsubmit="return confirm('Delete this transaction?')">
-                                <button type="submit" class="btn-icon delete-btn" style="padding: 0.2rem; opacity: 0.5;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                <% }); %>
-            <% } else { %>
-                <p class="empty-msg">No transactions yet.</p>
-            <% } %>
+        <div class="transaction-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Merchant</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (transactions.length > 0) { %>
+                        <% transactions.forEach(tx => { %>
+                            <tr>
+                                <td><%= new Date(tx.date).toLocaleDateString() %></td>
+                                <td>
+                                    <div style="font-weight: 600; color: var(--text-color);"><%= tx.merchant %></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);"><%= tx.note || '' %></div>
+                                </td>
+                                <td>
+                                    <span class="badge-category"><%= tx.category %></span>
+                                </td>
+                                <td style="font-weight: 600;">₹<%= tx.amount.toLocaleString() %></td>
+                                <td>
+                                    <form action="/transactions/delete/<%= tx._id %>" method="POST" style="display: inline;" onsubmit="return confirm('Delete this transaction?')">
+                                        <button type="submit" class="btn-icon delete-btn">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr><td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">No transactions yet.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -101,37 +122,90 @@
         <% suggestions.slice(0, 2).forEach(s => { %>
             <div class="insight-item">
                 <span class="insight-cat"><%= s.category %></span>
-                <p class="insight-text"><%= s.suggestion %></p>
+                <p class="insight-text"><%= s.message %></p>
             </div>
         <% }); %>
     </div>
 </div>
 
 <script>
-    // Initialize Chart
+    const chartData7 = {
+        labels: <%- JSON.stringify(chartLabels7) %>,
+        data: <%- JSON.stringify(chartData7) %>
+    };
+    const chartData30 = {
+        labels: <%- JSON.stringify(chartLabels30) %>,
+        data: <%- JSON.stringify(chartData30) %>
+    };
+
     const ctx = document.getElementById('spendingChart').getContext('2d');
-    new Chart(ctx, {
+    
+    // Gradient Background
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+    const spendingChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            labels: chartData7.labels,
             datasets: [{
                 label: 'Spending',
-                data: [1200, 1900, 3000, 5000, 2000, 3000, 4500],
+                data: chartData7.data,
                 borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                backgroundColor: gradient,
                 tension: 0.4,
-                fill: true
+                fill: true,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#3b82f6',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#e2e8f0',
+                    padding: 12,
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return '₹ ' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
             },
             scales: {
-                y: { display: false },
-                x: { grid: { display: false } }
+                y: { 
+                    display: true, 
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { callback: function(value) { return '₹' + value; } }
+                },
+                x: { 
+                    grid: { display: false } 
+                }
             }
         }
+    });
+
+    // Handle Filter Change
+    document.querySelector('.chart-filter').addEventListener('change', function(e) {
+        if (e.target.value === 'Last 30 Days') {
+            spendingChart.data.labels = chartData30.labels;
+            spendingChart.data.datasets[0].data = chartData30.data;
+        } else {
+            spendingChart.data.labels = chartData7.labels;
+            spendingChart.data.datasets[0].data = chartData7.data;
+        }
+        spendingChart.update();
     });
 </script>
