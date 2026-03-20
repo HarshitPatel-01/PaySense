@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 6
     },
+    initial_balance: {
+        type: Number,
+        default: 250000
+    },
     created_at: {
         type: Date,
         default: Date.now
